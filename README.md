@@ -1,2 +1,5 @@
 # AskHell
-Haskell me this, will it be fun?
+
+Fun stuff in Haskell
+
+I'm truly a pun master 

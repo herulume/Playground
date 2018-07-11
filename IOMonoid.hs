@@ -1,5 +1,5 @@
 -- haskellforall.com/2018/02/the-wizard-monoid.html
-import Data.Monoid hiding ((<>))
+import Data.Monoid ((<>))
 import qualified System.Directory
 
 prompt :: String -> IO (IO ())
@@ -15,7 +15,7 @@ runWizard request = do
 
 
 main :: IO ()
-main = runWizard $ foldMap prompt ["name", "age", "number"]
+main = runWizard $ (prompt "name") <> prompt "age"  
 
 
 promptFiles :: FilePath -> IO (IO ())
