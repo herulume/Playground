@@ -3,7 +3,7 @@
 
 data Unit = Unit -- Guess what, it's a fucking unit m8
 data Prod a b = P a b -- cross product
-data SUum a b = L a | R b  -- dijoint union
+data Sum a b = L a | R b  -- disjoint union
 newtype Mu f = Mu (forall a . (f a -> a) -> a) -- least fixed point
 
 -- Nats
