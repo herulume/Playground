@@ -1,5 +1,4 @@
-import Data.Functor.Foldable 
-
+newtype Fix f = Fix { unFix :: f (Fix f) }
 data Op = Add | Mult deriving Show
 data ASTF r = BinOpF Op r r | Num Int 
 type AST = Fix ASTF 
@@ -11,9 +10,11 @@ instance Functor ASTF where
 simpleExprFix :: Fix ASTF
 simpleExprFix = Fix (BinOpF Mult (Fix (BinOpF Add (Fix (Num 1)) (Fix (Num 2)))) (Fix (Num 3)))
 
-interpret :: Either AST AST -> Either Int String
-interpret (Left ast) = Left $ cata algebraI ast
-interpret (Right ast) = Right $ cata algebraS ast
+cata :: Functor f => (f a -> a) -> Fix f -> a
+cata f = f . (fmap (cata f)) . unFix
+
+interpret :: AST ->  Int 
+interpret = cata  algebraI 
 
 algebraI :: ASTF Int -> Int
 algebraI (Num n) = n
