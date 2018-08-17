@@ -60,8 +60,8 @@ possTerm = parseString [] ['+', '*'] . stripspace  where
     parseString acc ops [x,y] = acc
     parseString acc ops (x:operand:x0:xs) | operand `elem` ops = parseString ([x,operand,x0]:acc) ops xs
                                           | otherwise = parseString acc ops (x0:xs)
-    stripspace :: String -> String
-    stripspace = foldr (\x acc -> case (isSpace x) of True -> acc; False -> x:acc) [] 
+stripspace :: String -> String
+stripspace = foldr (\x acc -> case (isSpace x) of True -> acc; False -> x:acc) [] 
 
 validTerms :: [String] -> Maybe AST
 validTerms [] = Nothing
@@ -79,6 +79,8 @@ parse = validTerms . possTerm
 
 
 main :: IO ()
-main = getLine >>= \x -> case parse x of
-                             Nothing -> pure () 
-                             (Just ast) -> (putStrLn . show . interpret) ast
+main = getLine >>= \x -> case x of
+                             "exit" -> pure ()
+                             _ -> (\l -> case parse l of
+                                            Nothing -> main
+                                            (Just ast) -> (putStrLn . show . interpret) ast) x >> main
