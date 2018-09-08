@@ -3,6 +3,7 @@
 {-# LANGUAGE KindSignatures #-} -- kinds in signatures
 {-# LANGUAGE TypeFamilies #-} -- functions that operate on types
 
+
 data Nat where
     Zero :: Nat
     Succ :: Nat -> Nat
@@ -28,3 +29,17 @@ vappend (a :- as) rest = a :- vappend as rest
 
 vhead :: Vector (Succ n) a -> a
 vhead (a :-  _ ) = a
+
+toList :: Vector n a -> [a]
+toList VNil = []
+toList (a :- as) = a : toList as
+
+data SafeList a where
+    SafeList :: Vector n a -> SafeList a
+instance Show a => Show (SafeList a) where
+    show (SafeList  a) = "LOL: " ++ show a
+
+
+vfromList :: [a] -> SafeList a
+vfromList = foldr f (SafeList VNil) where
+    f x (SafeList xs) = SafeList (x :- xs)
