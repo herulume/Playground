@@ -35,6 +35,23 @@ program1 goLeftAlways = do
 
 main :: IO ()
 main = interpretIO program0
+
+data StackF k  = Push Int k
+               | Top (Int -> k)
+               | Pop k
+               | Add k
+               deriving Functor
+push :: Int -> FreeStack ()
+push n = liftF (Push n ())
+
+pop :: FreeStack ()
+pop = liftF (Pop ())
+
+top :: FreeStack Int
+top = liftF (Top id)
+
+add :: FreeStack ()
+add = liftF (Add ())
 -- Since we are not using any library and/or language extension
 instance Functor DirectiveF where
   fmap f (L r) = L $ f r
