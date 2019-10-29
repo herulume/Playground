@@ -1,5 +1,5 @@
 dialogo :: String -> IO String
-dialogo s = putStr s >> getLine >>= return
+dialogo s = putStr s >> getLine
 
 questionario :: [String] -> IO [String]
 questionario [] = return [];
