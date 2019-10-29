@@ -10,17 +10,17 @@ succ :: Nat -> Nat
 succ = Fix . SuccF
 
 instance Functor NatF where
-    fmap _ Zero = Zero
+    fmap _ Zero      = Zero
     fmap f (SuccF e) = SuccF $ f e
 
 cata :: Functor f => (f a -> a) -> Fix f -> a
-cata f = f . (fmap (cata f)) . unFix
+cata f = f . fmap (cata f) . unFix
 
-eval :: Nat ->  Int 
+eval :: Nat ->  Int
 eval = cata algebra
 
 algebra :: NatF Int -> Int
-algebra Zero = 0
+algebra Zero      = 0
 algebra (SuccF r) = r + 1
 
 
