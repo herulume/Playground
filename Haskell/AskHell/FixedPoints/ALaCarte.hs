@@ -1,4 +1,7 @@
-{-# LANGUAGE TypeOperators, MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators         #-}
 
 data Expr f = In (f (Expr f))
 
@@ -15,16 +18,16 @@ addExample :: Expr (Val :+: Add)
 addExample = In(Inr(Add(In(Inl(Val 118)))(In(Inl(Val 1219)))))
 
 instance Functor Val where
-    fmap f (Val x) = Val x 
+    fmap f (Val x) = Val x
 instance Functor Add where
-    fmap f (Add e1 e2) = Add (f e1) (f e2) 
+    fmap f (Add e1 e2) = Add (f e1) (f e2)
 instance (Functor f, Functor g) => Functor (f :+: g) where
     fmap f (Inl e1) = Inl (fmap f e1)
     fmap f (Inr e2) = Inr (fmap f e2)
 
 
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a
-foldExpr f (In t) = f (fmap (foldExpr f) t) 
+foldExpr f (In t) = f (fmap (foldExpr f) t)
 
 
 class Functor f => Eval f where
@@ -33,10 +36,10 @@ class Functor f => Eval f where
 instance Eval Val where
     evalAlgebra (Val x) = x
 instance Eval Add where
-    evalAlgebra (Add x y) = x + y  
+    evalAlgebra (Add x y) = x + y
 instance (Eval f, Eval g) => Eval (f :+: g) where
     evalAlgebra (Inl x) = evalAlgebra x
-    evalAlgebra (Inr y) = evalAlgebra y 
+    evalAlgebra (Inr y) = evalAlgebra y
 
 eval :: Eval f => Expr f -> Int
 eval expr = foldExpr evalAlgebra expr
@@ -54,7 +57,7 @@ instance {-# OVERLAPPING #-} (Functor f, Functor g) => f :<: (f :+: g) where
     inj         =  Inl
     prj (Inl f) = Just f
     prj _       = Nothing
-    
+
 instance {-# OVERLAPPING #-}(Functor f, Functor g, Functor h, f :<: g) => f :<: (h :+: g) where
     inj         = Inr . inj
     prj (Inr g) = prj g
@@ -62,7 +65,7 @@ instance {-# OVERLAPPING #-}(Functor f, Functor g, Functor h, f :<: g) => f :<: 
 
 inject :: (g :<: f) => g (Expr f) -> Expr f
 inject = In . inj
-    
+
 val :: (Val :<: f) => Int -> Expr f
 val x = inject (Val x)
 
@@ -100,21 +103,21 @@ instance Render Mul where
 
 instance (Render f, Render g) => Render (f :+: g) where
     render (Inl x) = render x
-    render (Inr y) = render y 
+    render (Inr y) = render y
 
 
 match :: (g :<: f) => Expr f -> Maybe(g (Expr f))
 match (In t) = prj t
-    
+
 distr :: (Add :<: f, Mul :<: f) => Expr f -> Maybe (Expr f)
 distr t = do
     Mul a b <- match t
     Add c d <- match b
     return (a *. c +. a *. d)
-    
-    
+
+
 distribute :: (Add :<: f, Mul :<: f) => Expr f -> Expr f
-distribute e = case (distr e) of
+distribute e = case distr e of
     (Just x) -> x
-    Nothing -> e
-    
+    Nothing  -> e
+
