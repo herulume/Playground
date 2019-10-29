@@ -1,11 +1,13 @@
-import Text.Read
-import System.IO (IOMode(ReadMode, WriteMode), utf8, hClose, hGetContents, hPutStr, hSetEncoding, openFile)
-import System.IO.Error (tryIOError)
+import           System.IO       (IOMode (ReadMode, WriteMode), hClose,
+                                  hGetContents, hPutStr, hSetEncoding, openFile,
+                                  utf8)
+import           System.IO.Error (tryIOError)
+import           Text.Read
 
 type Item = String
 type Items = [Item]
 
-data Command = Quit | DisplayItems | AddItem Item | Help | Remove Int | Save 
+data Command = Quit | DisplayItems | AddItem Item | Help | Remove Int | Save
 
 addItem :: Item -> Items -> Items
 addItem = (:)
@@ -20,7 +22,7 @@ removeItem index items = impl (length items - index) items where
     impl _ []          = Left "No item to remove"
     impl n (item:rest) = case impl (n-1) rest of
                             Right newItems -> Right (item:newItems)
-                            Left errMsg    -> Left errMsg 
+                            Left errMsg    -> Left errMsg
 save :: Items -> IO Items
 save items = do
     putStrLn "File to save: "
@@ -32,7 +34,7 @@ save items = do
             hSetEncoding fileO utf8
             result <- tryIOError . hPutStr fileO $ unlines items
             case result of
-                Left _ -> putStrLn "Error writting to the file!"
+                Left _  -> putStrLn "Error writting to the file!"
                 Right _ -> hClose fileO
             return items
 
@@ -44,16 +46,16 @@ parseCommand line = case words line of
     "add" : item       -> Right . AddItem $ unwords item
     ["help"]           -> Right Help
     "remove" : [num]   -> case readMaybe num :: Maybe Int of
-                            Just x -> Right $ Remove x
+                            Just x  -> Right $ Remove x
                             Nothing -> Left "Invalid index"
     _                  -> Left "Wrong command."
 
 
-interactWithUser :: Items -> IO () 
-interactWithUser items = putStr "> " >> getLine >>= (executeCommand  items) . parseCommand
+interactWithUser :: Items -> IO ()
+interactWithUser items = putStr "> " >> getLine >>= executeCommand  items . parseCommand
 
-executeCommand :: Items -> Either String Command -> IO () 
-executeCommand items (Right Save)           = save items >> interactWithUser items 
+executeCommand :: Items -> Either String Command -> IO ()
+executeCommand items (Right Save)           = save items >> interactWithUser items
 executeCommand items (Right DisplayItems)   = foldMap putStrLn ["The list of items is:", displayItems items] >> interactWithUser items
 executeCommand items (Right (AddItem item)) = putStrLn "Item added" >> interactWithUser (addItem item items)
 executeCommand items (Right (Remove index)) = case removeItem index items of
@@ -61,9 +63,9 @@ executeCommand items (Right (Remove index)) = case removeItem index items of
     Left errorMsg  -> putStrLn errorMsg >> interactWithUser items
 
 executeCommand items (Right Quit)  = putStrLn "Bye!"
-executeCommand items (Right Help)  = putStrLn "Commands: help, quit, items, add <item to add>, remove <index>" >> interactWithUser items 
+executeCommand items (Right Help)  = putStrLn "Commands: help, quit, items, add <item to add>, remove <index>" >> interactWithUser items
 executeCommand items (Left errMsg) = putStrLn ("Error: " ++ errMsg ++ "\n") >> interactWithUser items
 
 
 main :: IO ()
-main = putStrLn "TODO app" >> interactWithUser [] 
+main = putStrLn "TODO app" >> interactWithUser []
