@@ -22,3 +22,20 @@ divBy0 amount nP = print (amount `div` nP) `catch` (\(e :: ArithException) -> pu
 divBy0' :: Int -> Int -> IO ()
 divBy0' amount nP = handle (\(e :: ArithException) -> putStrLn "NUMERO ERRADO DE PESSOAS") $
                             print (amount `div` nP)
+
+-- fails
+-- only when priting the exception is raised
+ae :: Rational -> Rational -> IO Rational
+ae n d =
+    return (n / d)
+    `catch` \(e :: ArithException) -> do
+                putStrLn $ "Numero errado de pessoas " ++ show e
+                return 0
+
+-- evaluate forces
+ae' :: Rational -> Rational -> IO Rational
+ae' n d =
+    evaluate (n / d)
+    `catch` \(e :: ArithException) -> do
+                putStrLn $ "Numero errado de pessoas " ++ show e
+                return 0
