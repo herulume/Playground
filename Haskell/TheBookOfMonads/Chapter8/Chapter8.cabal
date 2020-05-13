@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bc213d53777729113287b5e2f8cd9d8d4f08c95c241b981620743050807e8092
+-- hash: 42a6c05a05bb868b9793f09ed4dd3a27c104b939ff5283127d9f7bde4d9c5a49
 
 name:           Chapter8
 version:        0.1.0.0
@@ -35,6 +35,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , stm
   default-language: Haskell2010
 
 executable Chapter8-exe
@@ -47,6 +48,7 @@ executable Chapter8-exe
   build-depends:
       Chapter8
     , base >=4.7 && <5
+    , stm
   default-language: Haskell2010
 
 test-suite Chapter8-test
@@ -60,4 +62,5 @@ test-suite Chapter8-test
   build-depends:
       Chapter8
     , base >=4.7 && <5
+    , stm
   default-language: Haskell2010

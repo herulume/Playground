@@ -4,6 +4,7 @@ module St where
 import Control.Monad.ST
 import Data.STRef
 import Control.Exception
+import Control.Concurrent.STM
 
 weirdSum = do
     x <- newSTRef 1
@@ -39,3 +40,24 @@ ae' n d =
     `catch` \(e :: ArithException) -> do
                 putStrLn $ "Numero errado de pessoas " ++ show e
                 return 0
+
+addName :: TVar Int -> TVar [(Int, String)] -> String -> STM ()
+addName counter names name = do
+    b <- fmap (null . (filter ((==name) . snd))) . readTVar $ names
+    if not b then pure ()
+             else do
+                 i <- readTVar counter
+                 modifyTVar names ((i, name) :)
+                 writeTVar counter (succ i)
+
+names = do
+    c <- newTVar 0
+    ns <- newTVar []
+    addName c ns "ola"
+    addName c ns "adeus"
+    addName c ns "ola"
+    addName c ns "ola"
+    addName c ns "namarie"
+    addName c ns "ola"
+    addName c ns "ola"
+    pure ns
