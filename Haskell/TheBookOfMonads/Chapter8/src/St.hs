@@ -43,7 +43,7 @@ ae' n d =
 
 addName :: TVar Int -> TVar [(Int, String)] -> String -> STM ()
 addName counter names name = do
-    b <- fmap (null . (filter ((==name) . snd))) . readTVar $ names
+    b <- fmap (not . any ((==name) . snd)) . readTVar $ names
     if not b then pure ()
              else do
                  i <- readTVar counter
