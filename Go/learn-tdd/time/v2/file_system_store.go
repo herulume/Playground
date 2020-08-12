@@ -20,7 +20,7 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("problem initialising player db file, %v", err)
 	}
-	league, err := Newleague(file)
+	league, err := NewLeague(file)
 
 	if err != nil {
 		return nil, fmt.Errorf("problem loading player store from file %s, %v", file.Name(), err)
