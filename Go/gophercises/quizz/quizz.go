@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Round struct {
@@ -43,4 +44,19 @@ func LoadQuizz(location string) (Quizz, error) {
 	}
 
 	return quizz, nil
+}
+
+func (r Round) String() string {
+	return fmt.Sprintf("Question: %s <*> Answer: %s", r.Question, r.Answer)
+}
+
+func (q Quizz) String() string {
+	var sb strings.Builder
+
+	for _, r := range q {
+		sb.WriteString(r.String())
+                sb.WriteString("\n")
+	}
+
+	return sb.String()
 }
