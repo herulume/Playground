@@ -49,7 +49,7 @@ func (q *Quizz) Start(alertsDestination io.Writer) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for i, r := range q.Quizz {
-		fmt.Fprint(alertsDestination, r.FormatQuestion(i+1))
+		fmt.Fprint(alertsDestination, r.FormatQuestion(i))
 
 		got, _ := reader.ReadString('\n')
 		q.evalAnswer(got, r.Answer)
