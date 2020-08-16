@@ -1,8 +1,10 @@
 package quizz
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -12,15 +14,12 @@ type Round struct {
 	Answer   string
 }
 
-type Quizz []Round
-
-const defaultQuizzLocation = "problems.csv"
-
-func LoadDefaultQuizz() (Quizz, error) {
-	return LoadQuizz(defaultQuizzLocation)
+type Quizz struct {
+	Quizz  []Round
+	Points uint
 }
 
-func LoadQuizz(location string) (Quizz, error) {
+func NewQuizz(location string) (*Quizz, error) {
 	csvFile, err := os.Open(location)
 	defer csvFile.Close()
 
@@ -34,7 +33,7 @@ func LoadQuizz(location string) (Quizz, error) {
 		return nil, fmt.Errorf("problem reading quizz's questions, %v", err)
 	}
 
-	var quizz Quizz
+	var quizz []Round
 	for _, round := range rounds {
 		q := Round{
 			Question: round[0],
@@ -43,20 +42,34 @@ func LoadQuizz(location string) (Quizz, error) {
 		quizz = append(quizz, q)
 	}
 
-	return quizz, nil
+	return &Quizz{quizz, 0}, nil
 }
 
-func (r Round) String() string {
-	return fmt.Sprintf("Question: %s <*> Answer: %s", r.Question, r.Answer)
-}
+func (q *Quizz) Start(alertsDestination io.Writer) {
+	reader := bufio.NewReader(os.Stdin)
 
-func (q Quizz) String() string {
-	var sb strings.Builder
+	for i, r := range q.Quizz {
+		fmt.Fprint(alertsDestination, r.FormatQuestion(i+1))
 
-	for _, r := range q {
-		sb.WriteString(r.String())
-                sb.WriteString("\n")
+		got, _ := reader.ReadString('\n')
+		q.evalAnswer(got, r.Answer)
 	}
+}
 
-	return sb.String()
+func (r *Round) FormatQuestion(index int) string {
+	return fmt.Sprintf("Problem #%d: %s = ", index+1, r.Question)
+}
+
+func (q *Quizz) evalAnswer(got, want string) {
+	awnswer := strings.TrimSuffix(got, "\n")
+	if awnswer == want {
+		q.Points++
+	}
+}
+
+func (q *Quizz) Finish(alertDestination io.Writer) {
+	total := len(q.Quizz)
+
+	fmt.Fprint(alertDestination, "Quizz finished!\n")
+	fmt.Fprintf(alertDestination, "Got %d out of %d points\n", q.Points, total)
 }

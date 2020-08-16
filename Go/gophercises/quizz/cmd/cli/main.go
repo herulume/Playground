@@ -7,12 +7,11 @@ import (
 )
 
 func main() {
-	fmt.Println("Loading default quizz...")
-	q, err := quizz.LoadDefaultQuizz()
+	q, err := quizz.NewCLI("problems.csv")
 
 	if err != nil {
 		fmt.Printf("Failed to create the quizz %v", err)
 	}
 
-	fmt.Print(q)
+	q.Play()
 }
