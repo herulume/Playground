@@ -3,6 +3,7 @@ package quizz
 import (
 	"fmt"
 	"io"
+	"time"
 )
 
 type Cli struct {
@@ -11,8 +12,8 @@ type Cli struct {
 	in   io.Reader
 }
 
-func NewCLI(gameLocation string, out io.Writer, in io.Reader) (*Cli, error) {
-	game, err := NewQuizz(gameLocation)
+func NewCLI(gameLocation string, out io.Writer, in io.Reader, timer time.Duration) (*Cli, error) {
+	game, err := NewQuizz(gameLocation, timer)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error creating CLI for the game %v", err)
@@ -23,7 +24,7 @@ func NewCLI(gameLocation string, out io.Writer, in io.Reader) (*Cli, error) {
 	return &cli, nil
 }
 
-const loadingPrompt = "Loading default game..."
+const loadingPrompt = "Loading the game..."
 
 func (c *Cli) Play() {
 	fmt.Fprintln(c.out, loadingPrompt)

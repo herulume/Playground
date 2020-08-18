@@ -7,20 +7,21 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
 type Round struct {
 	Question string
 	Answer   string
-
 }
 
 type Quizz struct {
-	Quizz  []Round
-	Points uint
+	Quizz         []Round
+	Points        uint
+	TimerDuration time.Duration
 }
 
-func NewQuizz(location string) (*Quizz, error) {
+func NewQuizz(location string, timerDuration time.Duration) (*Quizz, error) {
 	csvFile, err := os.Open(location)
 	defer csvFile.Close()
 
@@ -42,17 +43,33 @@ func NewQuizz(location string) (*Quizz, error) {
 		}
 	}
 
-	return &Quizz{quizz, 0}, nil
+	return &Quizz{
+		Quizz:         quizz,
+		Points:        0,
+		TimerDuration: timerDuration,
+	}, nil
 }
 
 func (q *Quizz) Start(alertsDestination io.Writer, input io.Reader) {
 	reader := bufio.NewReader(input)
+	timer := time.NewTimer(q.TimerDuration)
 
 	for i, r := range q.Quizz {
 		fmt.Fprint(alertsDestination, r.FormatQuestion(i))
+		answerChan := make(chan string)
 
-		got, _ := reader.ReadString('\n')
-		q.evalAnswer(got, r.Answer)
+		go func() {
+			got, _ := reader.ReadString('\n')
+			answerChan <- got
+		}()
+
+		select {
+		case <-timer.C:
+			fmt.Fprint(alertsDestination, "\n\nTime's out!\n")
+			return
+		case answer := <-answerChan:
+			q.evalAnswer(answer, r.Answer)
+		}
 	}
 }
 
