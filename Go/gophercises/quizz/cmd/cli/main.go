@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	csv := flag.String("file", "problems.csv", "File to load the quizz from")
+	csv := flag.String("csv", "problems.csv", "a csv file in the format 'question,answer'")
 	flag.Parse()
 
 	q, err := quizz.NewCLI(*csv)

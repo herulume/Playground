@@ -12,6 +12,7 @@ import (
 type Round struct {
 	Question string
 	Answer   string
+
 }
 
 type Quizz struct {
@@ -33,20 +34,19 @@ func NewQuizz(location string) (*Quizz, error) {
 		return nil, fmt.Errorf("problem reading quizz's questions, %v", err)
 	}
 
-	var quizz []Round
-	for _, round := range rounds {
-		q := Round{
+	quizz := make([]Round, len(rounds))
+	for i, round := range rounds {
+		quizz[i] = Round{
 			Question: round[0],
-			Answer:   round[1],
+			Answer:   strings.TrimSpace(round[1]),
 		}
-		quizz = append(quizz, q)
 	}
 
 	return &Quizz{quizz, 0}, nil
 }
 
-func (q *Quizz) Start(alertsDestination io.Writer) {
-	reader := bufio.NewReader(os.Stdin)
+func (q *Quizz) Start(alertsDestination io.Writer, input io.Reader) {
+	reader := bufio.NewReader(input)
 
 	for i, r := range q.Quizz {
 		fmt.Fprint(alertsDestination, r.FormatQuestion(i))

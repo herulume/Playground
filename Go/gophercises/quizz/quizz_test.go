@@ -2,6 +2,7 @@ package quizz_test
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
 	"github.com/herulume/quizz"
@@ -28,14 +29,34 @@ func TestNewQuizz(t *testing.T) {
 		quizz.AssertNoError(t, err)
 		quizz.AssertQuizz(t, got, &wantedQuizz)
 	})
+
 }
 
 func TestQuizzStart(t *testing.T) {
 
 	t.Run("it prints all the questions", func(t *testing.T) {
 		QuestionsSpy := bytes.Buffer{}
-		wantedQuizz.Start(&QuestionsSpy)
+		wantedQuizz.Start(&QuestionsSpy, os.Stdin)
 
 		quizz.AssertQuestions(t, QuestionsSpy, &wantedQuizz)
+	})
+
+	t.Run("it sets points accordingly to our answers", func(t *testing.T) {
+		discard := bytes.Buffer{}
+		fakeStdin := bytes.Buffer{}
+		fakeStdin.Write([]byte("2\n4\n1\n"))
+
+		wantedQuizz.Points = 0
+
+		wantedQuizz.Start(&discard, &fakeStdin)
+
+		got := wantedQuizz.Points
+		want := uint(2)
+
+		if got != want {
+			t.Errorf("expected %v points, got %v", want, got)
+		}
+
+		wantedQuizz.Points = 0
 	})
 }
