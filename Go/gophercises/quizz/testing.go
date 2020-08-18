@@ -9,11 +9,11 @@ import (
 	"testing"
 )
 
-func AssertQuestions(t *testing.T, gotB bytes.Buffer, quizzW *Quizz) {
+func AssertQuestions(t *testing.T, gotB bytes.Buffer, quizz []Round) {
 	t.Helper()
 
 	var sb strings.Builder
-	for i, q := range quizzW.Quizz {
+	for i, q := range quizz {
 		s := q.FormatQuestion(i)
 		sb.WriteString(s)
 	}
@@ -27,7 +27,7 @@ func AssertQuestions(t *testing.T, gotB bytes.Buffer, quizzW *Quizz) {
 
 }
 
-func AssertQuizz(t *testing.T, got, want *Quizz) {
+func AssertQuizz(t *testing.T, got, want []Round) {
 	t.Helper()
 
 	if !reflect.DeepEqual(got, want) {
@@ -35,7 +35,7 @@ func AssertQuizz(t *testing.T, got, want *Quizz) {
 	}
 }
 
-func CreateTempFile(t *testing.T, filename string, quizz Quizz) (*os.File, func()) {
+func CreateTempFile(t *testing.T, filename string, quizz []Round) (*os.File, func()) {
 	t.Helper()
 
 	tmpfile, err := os.Create(filename)
@@ -45,7 +45,7 @@ func CreateTempFile(t *testing.T, filename string, quizz Quizz) (*os.File, func(
 	}
 
 	csvwriter := csv.NewWriter(tmpfile)
-	for _, round := range quizz.Quizz {
+	for _, round := range quizz {
 		var row []string
 		row = append(row, round.Question, round.Answer)
 		csvwriter.Write(row)
