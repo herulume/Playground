@@ -3,7 +3,6 @@ package quizz
 import (
 	"fmt"
 	"io"
-	"os"
 )
 
 type Cli struct {
@@ -12,14 +11,14 @@ type Cli struct {
 	in   io.Reader
 }
 
-func NewCLI(gameLocation string) (*Cli, error) {
+func NewCLI(gameLocation string, out io.Writer, in io.Reader) (*Cli, error) {
 	game, err := NewQuizz(gameLocation)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error creating CLI for the game %v", err)
 	}
 
-	cli := Cli{game, os.Stdout, os.Stdin}
+	cli := Cli{game, out, in}
 
 	return &cli, nil
 }
