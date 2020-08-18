@@ -20,6 +20,7 @@ func main() {
 
 	if err != nil {
 		fmt.Printf("Failed to create the quizz %v", err)
+                os.Exit(1)
 	}
 
 	q := quizz.NewCLI(game, os.Stdout, os.Stdin)

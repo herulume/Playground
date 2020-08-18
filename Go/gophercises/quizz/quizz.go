@@ -50,6 +50,8 @@ func NewQuizz(location string, timerDuration time.Duration) (*Quizz, error) {
 	}, nil
 }
 
+const QuizzTimedOut = "\n\nTimed out!\n"
+
 func (q *Quizz) Start(alertsDestination io.Writer, input io.Reader) {
 	reader := bufio.NewReader(input)
 	timer := time.NewTimer(q.TimerDuration)
@@ -65,7 +67,7 @@ func (q *Quizz) Start(alertsDestination io.Writer, input io.Reader) {
 
 		select {
 		case <-timer.C:
-			fmt.Fprint(alertsDestination, "\n\nTime's out!\n")
+			fmt.Fprint(alertsDestination, QuizzTimedOut)
 			return
 		case answer := <-answerChan:
 			q.evalAnswer(answer, r.Answer)
@@ -84,9 +86,13 @@ func (q *Quizz) evalAnswer(got, want string) {
 	}
 }
 
-func (q *Quizz) Finish(alertDestination io.Writer) {
-	total := len(q.Quizz)
+const QuizzEnd = "Quizz finished!\n"
 
-	fmt.Fprint(alertDestination, "Quizz finished!\n")
-	fmt.Fprintf(alertDestination, "Got %d out of %d points\n", q.Points, total)
+func (q *Quizz) Finish(alertDestination io.Writer) {
+	fmt.Fprint(alertDestination, QuizzEnd)
+	fmt.Fprint(alertDestination, q.FormatFinalPoints())
+}
+
+func (q *Quizz) FormatFinalPoints() string {
+	return fmt.Sprintf("Got %d out of %d points\n", q.Points, len(q.Quizz))
 }
