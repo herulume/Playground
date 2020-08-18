@@ -16,11 +16,13 @@ func main() {
 
 	time := time.Duration(*timeLimit) * time.Second
 
-	q, err := quizz.NewCLI(*csv, os.Stdout, os.Stdin, time)
+	game, err := quizz.NewQuizz(*csv, time)
 
 	if err != nil {
 		fmt.Printf("Failed to create the quizz %v", err)
 	}
+
+	q := quizz.NewCLI(game, os.Stdout, os.Stdin)
 
 	q.Play()
 }
