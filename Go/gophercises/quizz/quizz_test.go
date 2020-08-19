@@ -2,6 +2,7 @@ package quizz_test
 
 import (
 	"bytes"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -28,7 +29,7 @@ func TestNewQuizz(t *testing.T) {
 		got, err := quizz.NewQuizz(quizzFile, 30*time.Second)
 
 		quizz.AssertNoError(t, err)
-		quizz.AssertQuizz(t, got.Quizz, wantedQuizz)
+		assertQuizz(t, got.Quizz, wantedQuizz)
 	})
 
 }
@@ -47,7 +48,7 @@ func TestQuizzStart(t *testing.T) {
 
 		q.Start(&QuestionsSpy, &fakeStdin)
 
-		quizz.AssertQuestions(t, QuestionsSpy, wantedQuizz)
+		assertQuestions(t, QuestionsSpy, wantedQuizz)
 	})
 
 	t.Run("it sets points accordingly to answers", func(t *testing.T) {
@@ -80,6 +81,21 @@ func TestQuizzStart(t *testing.T) {
 			t.Error("expected a timeout message, didn't get any")
 		}
 	})
+
+	t.Run("it scores points before timing out", func(t *testing.T) {
+		discard := bytes.Buffer{}
+		fakeStdin := bytes.Buffer{}
+		fakeStdin.Write([]byte("2\n"))
+
+		q, _ := quizz.NewQuizz(quizzFile, 1*time.Second)
+
+		q.Start(&discard, &fakeStdin)
+		expectedPointsBeforeTimeOut := uint(1)
+
+		if q.Points != expectedPointsBeforeTimeOut {
+			t.Errorf("expected %d points before timing out, got %d", expectedPointsBeforeTimeOut, q.Points)
+		}
+	})
 }
 
 func TestQuizzFinish(t *testing.T) {
@@ -96,5 +112,31 @@ func TestQuizzFinish(t *testing.T) {
 
 	if got != want {
 		t.Errorf("expected %v, got %v", got, want)
+	}
+}
+
+func assertQuestions(t *testing.T, gotB bytes.Buffer, quizz []quizz.Round) {
+	t.Helper()
+
+	var sb strings.Builder
+	for i, q := range quizz {
+		s := q.FormatQuestion(i)
+		sb.WriteString(s)
+	}
+
+	got := gotB.String()
+	want := sb.String()
+
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+
+}
+
+func assertQuizz(t *testing.T, got, want []quizz.Round) {
+	t.Helper()
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
 	}
 }

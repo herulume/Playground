@@ -1,39 +1,11 @@
 package quizz
 
 import (
-	"bytes"
 	"encoding/csv"
 	"os"
-	"reflect"
-	"strings"
 	"testing"
 )
 
-func AssertQuestions(t *testing.T, gotB bytes.Buffer, quizz []Round) {
-	t.Helper()
-
-	var sb strings.Builder
-	for i, q := range quizz {
-		s := q.FormatQuestion(i)
-		sb.WriteString(s)
-	}
-
-	got := gotB.String()
-	want := sb.String()
-
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-
-}
-
-func AssertQuizz(t *testing.T, got, want []Round) {
-	t.Helper()
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
 
 func CreateTempFile(t *testing.T, filename string, quizz []Round) (*os.File, func()) {
 	t.Helper()

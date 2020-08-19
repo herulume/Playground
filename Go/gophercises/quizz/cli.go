@@ -19,10 +19,10 @@ func NewCLI(game Game, out io.Writer, in io.Reader) *Cli {
 	}
 }
 
-const loadingPrompt = "Loading the game..."
+const LoadingPrompt = "Loading the game...\n"
 
 func (c *Cli) Play() {
-	fmt.Fprintln(c.out, loadingPrompt)
+	fmt.Fprintf(c.out, LoadingPrompt)
 
 	c.game.Start(c.out, c.in)
 
