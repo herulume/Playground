@@ -1,9 +1,16 @@
 package urlshort
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+)
+
+const (
+	path = "/test"
+	site = "https://test.com"
 )
 
 func TestMapHandler(t *testing.T) {
@@ -17,17 +24,11 @@ func TestMapHandler(t *testing.T) {
 
 		mapHandler(response, request)
 
-		got := response.Body.String()
+		assertBody(t, response.Result(), fallbackResponse)
 
-		if got != fallbackResponse {
-			t.Errorf("Expected fallback response to be %s, got %v",
-				fallbackResponse, got)
-		}
 	})
 
 	t.Run("it routes known routes", func(t *testing.T) {
-		path := "/test"
-		site := "https://test.com"
 		knownPath := map[string]string{
 			path: site,
 		}
@@ -44,9 +45,65 @@ func TestMapHandler(t *testing.T) {
 	})
 }
 
+func TestYAMLHandler(t *testing.T) {
+	yaml := fmt.Sprintf(`
+- path: %s
+  url: %s
+`, path, site)
+	t.Run("it uses the fallback for unknown routes", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/unknown", nil)
+		response := httptest.NewRecorder()
+
+		yamlHandler := createYAMLHandler(t, yaml)
+		yamlHandler(response, request)
+
+		assertBody(t, response.Result(), fallbackResponse)
+	})
+
+	t.Run("it redirects for found url", func(t *testing.T) {
+		fmt.Println(yaml)
+		request, _ := http.NewRequest(http.MethodGet, path, nil)
+		response := httptest.NewRecorder()
+
+		yamlHandler := createYAMLHandler(t, yaml)
+		yamlHandler(response, request)
+		result := response.Result()
+
+		assertStatus(t, result, http.StatusFound)
+		assertURL(t, result, site)
+	})
+}
+
+func createYAMLHandler(t *testing.T, yaml string) http.HandlerFunc {
+	t.Helper()
+
+	fallbackHandler := http.HandlerFunc(fallback)
+	handler, err := YAMLHandler([]byte(yaml), fallbackHandler)
+	if err != nil {
+		t.Fatalf("could not create a YAML handler %v", err)
+	}
+
+	return handler
+}
+
 func createMapHandlerWithDefault(paths map[string]string) http.HandlerFunc {
 	fallbackHandler := http.HandlerFunc(fallback)
 	return MapHandler(paths, fallbackHandler)
+}
+
+func assertBody(t *testing.T, resp *http.Response, want string) {
+	t.Helper()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		t.Fatal("Could not ready response body", err)
+	}
+
+	got := string(body)
+	if want != got {
+		t.Errorf("Expected response body to be %s, got %s",
+			want, got)
+	}
 }
 
 func assertURL(t *testing.T, resp *http.Response, want string) {
