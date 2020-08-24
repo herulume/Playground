@@ -8,31 +8,9 @@ import (
 )
 
 func TestNewStory(t *testing.T) {
-	wantedJson := Story{
-		"Chapter 2": Chapter{
-			Title: "The running",
-			Paragraphs: []string{
-				"Run!!!!",
-			},
-			Options: []Option{
-				{
-					Text: "Try again!",
-					Arc:  "Intro",
-				},
-			},
-		},
-	}
-
-	wantedText := `{
-  "Chapter 2":{
-	"title":"The running", "story":["Run!!!!"], "options":[
-	  {"text":"Try again!", "arc":"Intro"}
-	]
-  }
- }`
 
 	t.Run("it creates a story from a json", func(t *testing.T) {
-		f, cleanFile := createTempFile(t, wantedText)
+		f, cleanFile := createTempFile(t, wantedJsonText)
 		defer cleanFile()
 
 		got, err := NewStory(f)
@@ -86,3 +64,26 @@ func createTempFile(t *testing.T, initialData string) (*os.File, func()) {
 
 	return tmpfile, removeFile
 }
+
+var wantedJson = Story{
+	"Chapter 2": Chapter{
+		Title: "The running",
+		Paragraphs: []string{
+			"Run!!!!",
+		},
+		Options: []Option{
+			{
+				Text: "Try again!",
+				Arc:  "Intro",
+			},
+		},
+	},
+}
+
+const wantedJsonText = `{
+  "Chapter 2":{
+	"title":"The running", "story":["Run!!!!"], "options":[
+	  {"text":"Try again!", "arc":"Intro"}
+	]
+  }
+ }`
