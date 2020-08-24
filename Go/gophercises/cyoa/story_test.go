@@ -41,7 +41,7 @@ func TestNewStory(t *testing.T) {
 		assertStory(t, got, wantedJson)
 	})
 
-	t.Run("works with an empty file", func(t *testing.T) {
+	t.Run("it works with an empty file", func(t *testing.T) {
 		f, cleanFile := createTempFile(t, "")
 		defer cleanFile()
 
