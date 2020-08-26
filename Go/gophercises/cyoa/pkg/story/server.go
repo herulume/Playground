@@ -12,6 +12,60 @@ func init() {
 
 var tpl *template.Template
 
+type server struct {
+	story       Story
+	template    *template.Template
+	chapterFunc func(r *http.Request) string
+}
+
+func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := s.chapterFunc(r)
+
+	if st, ok := s.story[path]; ok {
+		err := s.template.Execute(w, st)
+		if err != nil {
+			http.Error(w, "Something went wrong.", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	http.Error(w, "Chapter not found", http.StatusNotFound)
+}
+
+type HandlerOption func(h *server)
+
+func WithTemplate(t *template.Template) HandlerOption {
+	return func(h *server) {
+		h.template = t
+	}
+}
+
+func WithChapterFunc(fn func(r *http.Request) string) HandlerOption {
+	return func(h *server) {
+		h.chapterFunc = fn
+	}
+}
+
+func NewStoryHandler(s Story, opts ...HandlerOption) http.Handler {
+	h := server{s, tpl, defaultPath}
+
+	for _, opt := range opts {
+		opt(&h)
+	}
+
+	return h
+}
+
+func defaultPath(r *http.Request) string {
+	path := strings.TrimSpace(r.URL.Path)
+
+	if path == "" || path == "/" {
+		path = "/intro"
+	}
+
+	return path[1:] // Remove '/'
+}
+
 var defaultHandlerTmpl = `
 <!DOCTYPE html>
 <html>
@@ -33,6 +87,7 @@ var defaultHandlerTmpl = `
 		</ul>
 	  {{else}}
 		<h3>The End</h3>
+		<h2><a href="/">Back to the start!</a></h2>
 	  {{end}}
 	</section>
 	<style>
@@ -77,40 +132,3 @@ var defaultHandlerTmpl = `
 	</style>
   </body>
 </html>`
-
-type server struct {
-	story    Story
-	template *template.Template
-}
-
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	path := cleanPath(r.URL.Path)
-
-	if st, ok := s.story[path]; ok {
-		err := tpl.Execute(w, st)
-		if err != nil {
-			http.Error(w, "Something went wrong.", http.StatusInternalServerError)
-		}
-		return
-	}
-
-	http.Error(w, "Chapter not found", http.StatusNotFound)
-}
-
-func NewStoryServer(s Story, t *template.Template) http.Handler {
-	if t == nil {
-		t = tpl
-	}
-
-	return server{s, t}
-}
-
-func cleanPath(path string) string {
-	path = strings.TrimSpace(path)
-
-	if path == "" || path == "/" {
-		path = "/intro"
-	}
-
-	return path[1:] // Remove '/'
-}
