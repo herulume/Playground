@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	cyoa "github.com/herulume/cyoa/pkg/story"
 )
@@ -38,18 +37,4 @@ func main() {
 
 	fmt.Printf("Starting the server on port %d\n", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), h))
-}
-
-func storyPath(r *http.Request) string {
-	path := strings.TrimSpace(r.URL.Path)
-
-	if path == "/story" || path == "/story/" {
-		path = "/story/intro"
-	}
-
-	return path[len("/story/"):]
-}
-
-func meh(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("¯\\_(ツ)_/¯"))
 }

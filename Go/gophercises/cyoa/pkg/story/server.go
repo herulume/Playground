@@ -12,13 +12,13 @@ func init() {
 
 var tpl *template.Template
 
-type server struct {
+type storyHandler struct {
 	story       Story
 	template    *template.Template
 	chapterFunc func(r *http.Request) string
 }
 
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s storyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := s.chapterFunc(r)
 
 	if st, ok := s.story[path]; ok {
@@ -32,22 +32,22 @@ func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Chapter not found", http.StatusNotFound)
 }
 
-type HandlerOption func(h *server)
+type HandlerOption func(h *storyHandler)
 
 func WithTemplate(t *template.Template) HandlerOption {
-	return func(h *server) {
+	return func(h *storyHandler) {
 		h.template = t
 	}
 }
 
 func WithChapterFunc(fn func(r *http.Request) string) HandlerOption {
-	return func(h *server) {
+	return func(h *storyHandler) {
 		h.chapterFunc = fn
 	}
 }
 
 func NewStoryHandler(s Story, opts ...HandlerOption) http.Handler {
-	h := server{s, tpl, defaultPath}
+	h := storyHandler{s, tpl, defaultPath}
 
 	for _, opt := range opts {
 		opt(&h)
