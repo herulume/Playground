@@ -125,70 +125,70 @@ _ =
   ∎
 
 
-_º_ : ℕ → ℕ → ℕ
-m º zero = m
-zero º suc n = zero
-suc m º suc n = m º n
+_∸_ : ℕ → ℕ → ℕ
+m ∸ zero = m
+zero ∸ suc n = zero
+suc m ∸ suc n = m ∸ n
 
 _ =
   begin
-    3 º 2
+    3 ∸ 2
   ≡⟨⟩
-    2 º 1
+    2 ∸ 1
   ≡⟨⟩
-    1 º 0
+    1 ∸ 0
   ≡⟨⟩
     1
   ∎
 
 _ =
   begin
-    2 º 3
+    2 ∸ 3
   ≡⟨⟩
-    1 º 2
+    1 ∸ 2
   ≡⟨⟩
-    0 º 1
+    0 ∸ 1
   ≡⟨⟩
     0
   ∎
 
 _ =
   begin
-    5 º 3
+    5 ∸ 3
   ≡⟨⟩
-    4 º 2
+    4 ∸ 2
   ≡⟨⟩
-    3 º 1
+    3 ∸ 1
   ≡⟨⟩
-    2 º 0
+    2 ∸ 0
   ≡⟨⟩
     2
   ∎
 
-
 _ =
   begin
-    3 º 5
+    3 ∸ 5
   ≡⟨⟩
-    2 º 4
+    2 ∸ 4
   ≡⟨⟩
-    1 º 3
+    1 ∸ 3
   ≡⟨⟩
-    0 º 2
+    0 ∸ 2
   ≡⟨⟩
     0
   ∎
 
-infixl 6  _+_  _º_
+infixl 6  _+_  _∸_
 infixl 7  _*_
 
+{- done using agda mode -}
 _■_ : ℕ → ℕ → ℕ
 zero ■ n = n
 suc m ■ n = suc (m ■ n)
 
 {-# BUILTIN NATPLUS _+_ #-}
 {-# BUILTIN NATTIMES _*_ #-}
-{-# BUILTIN NATMINUS _º_ #-}
+{-# BUILTIN NATMINUS _∸_ #-}
 
 data Bin : Set where
   ⟨⟩ : Bin
