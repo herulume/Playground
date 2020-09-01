@@ -204,3 +204,7 @@ _ =
 +-comm′ : ∀ (m n : ℕ) → m + n ≡ n + m
 +-comm′ m zero rewrite +-identity′ m = refl
 +-comm′ m (suc n) rewrite +-suc′ m n | +-comm′ m n = refl
+
++-assoc'' : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
++-assoc'' zero n p = refl
++-assoc'' (suc m) n p rewrite +-assoc'' m n p = refl
