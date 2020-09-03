@@ -208,3 +208,174 @@ _ =
 +-assoc'' : ∀ (m n p : ℕ) → (m + n) + p ≡ m + (n + p)
 +-assoc'' zero n p = refl
 +-assoc'' (suc m) n p rewrite +-assoc'' m n p = refl
+
++-swap : ∀ (m n p : ℕ) → m + (n + p) ≡ n + (m + p)
++-swap m n p =
+  begin
+    m + (n + p)
+  ≡⟨ sym (+-assoc m n p) ⟩
+    (m + n) + p
+  ≡⟨ cong (_+ p) (+-comm m n) ⟩
+    (n + m) + p
+  ≡⟨ +-assoc n m p ⟩
+    n + (m + p)
+  ∎
+
+*-distrib-+ : ∀ (m n p : ℕ) → (m + n) * p ≡ m * p + n * p
+*-distrib-+ zero n p =
+  begin
+    (zero + n) * p
+  ≡⟨⟩
+    n * p
+  ≡⟨⟩
+    zero * p + n * p
+  ∎
+*-distrib-+ (suc m) n p =
+  begin
+    ((suc m) + n) * p
+  ≡⟨ cong (_* p) (+-comm (suc m) n) ⟩
+    (n + (suc m)) * p
+  ≡⟨ cong (_* p) (+-suc n m) ⟩
+    (suc (n + m)) * p
+  ≡⟨⟩
+    p + ((n + m) * p)
+  ≡⟨ cong (p +_) (*-distrib-+ n m p) ⟩
+    p + (n * p + m * p)
+  ≡⟨ cong (p +_) (+-comm (n * p) (m * p)) ⟩
+    p + (m * p + n * p)
+  ≡⟨ sym (+-assoc p (m * p) (n * p)) ⟩
+    (p + (m * p)) + n * p
+  ≡⟨⟩
+    (suc m) * p + n * p
+  ∎
+
+*-assoc : ∀ (m n p : ℕ) → (m * n) * p ≡ m * (n * p)
+*-assoc zero n p =
+  begin
+    (zero * n) * p
+  ≡⟨⟩
+    zero * p
+  ≡⟨⟩
+    zero
+  ≡⟨⟩
+    zero * (n * p)
+  ∎
+*-assoc (suc m) n p =
+  begin
+    ((suc m) * n) * p
+  ≡⟨⟩
+    (n + m * n) * p
+  ≡⟨ *-distrib-+ n (m * n) p ⟩
+    (n * p) + m * n * p
+  ≡⟨ cong ((n * p) +_) (*-assoc m n p) ⟩
+    (n * p) + m * (n * p)
+  ≡⟨⟩
+    (suc m) * (n * p)
+  ∎
+
+*-comm : ∀ (m n : ℕ) → m * n ≡ n * m
+*-comm zero zero = refl
+*-comm zero (suc n) =
+  begin
+    zero * (suc n)
+  ≡⟨⟩
+    zero
+  ≡⟨⟩
+    zero + (zero * n)
+  ≡⟨ *-comm zero n ⟩
+    zero + (n * zero)
+  ≡⟨⟩
+    (suc n) * zero
+  ∎
+*-comm (suc m) zero =
+  begin
+    (suc m) * zero
+  ≡⟨⟩
+    zero + (m * zero)
+  ≡⟨ *-comm m zero ⟩
+    (zero * m)
+  ≡⟨⟩
+    zero
+  ≡⟨⟩
+    zero * (suc m)
+  ∎
+*-comm (suc m) (suc n) =
+  begin
+    (suc m) * (suc n)
+  ≡⟨⟩
+    (suc n) + (m * (suc n))
+  ≡⟨ cong ((suc n) +_) (*-comm m (suc n)) ⟩
+    (suc n) + ((suc n) * m)
+  ≡⟨⟩
+    (suc n) + (m + (n * m))
+  ≡⟨ +-swap (suc n) m (n * m) ⟩
+    m + ((suc n) + (n * m))
+  ≡⟨ sym (+-assoc m (suc n) (n * m)) ⟩
+    (m + (suc n)) + (n * m)
+  ≡⟨ cong (_+ (n * m)) (+-suc m n) ⟩
+    suc (m + n) + (n * m)
+  ≡⟨ cong suc (+-assoc m n (n * m)) ⟩
+    (suc m) + (n + (n * m))
+  ≡⟨ cong (λ m*n → (suc m) + (n + m*n)) (*-comm n m) ⟩
+    (suc m) + (n + (m * n))
+  ≡⟨⟩
+    (suc m) + ((suc m) * n)
+  ≡⟨ cong ((suc m) +_) (*-comm ((suc m)) n) ⟩
+    (suc m) + (n * (suc m))
+  ≡⟨⟩
+    (suc n) * (suc m)
+  ∎
+
+0∸n≡0 : ∀ (n : ℕ) → zero ∸ n ≡ zero
+0∸n≡0 zero =
+  begin
+    zero ∸ zero
+  ≡⟨⟩
+    zero
+  ∎
+0∸n≡0 (suc n) =
+  begin
+    zero ∸ (suc n)
+  ≡⟨⟩
+    zero
+  ∎
+
+∸-+-assoc : ∀ (m n p : ℕ) → m ∸ n ∸ p ≡ m ∸ (n + p)
+∸-+-assoc m zero p =
+  begin
+    m ∸ zero ∸ p
+  ≡⟨⟩
+    m ∸ p
+  ≡⟨⟩
+    m ∸ (zero + p)
+  ∎
+∸-+-assoc m n zero =
+  begin
+    m ∸ n ∸ zero
+  ≡⟨⟩
+    m ∸ n
+  ≡⟨⟩
+    m ∸ (zero + n)
+  ≡⟨ cong (m ∸_) (+-comm zero n) ⟩
+    m ∸ (n + zero)
+  ∎
+∸-+-assoc zero n p =
+  begin
+    zero ∸ n ∸ p
+  ≡⟨ cong (_∸ p) (0∸n≡0 n) ⟩
+    zero ∸ p
+  ≡⟨ 0∸n≡0 p ⟩
+    zero
+  ≡⟨ sym (0∸n≡0 (n + p)) ⟩
+    zero ∸ (n + p)
+  ∎
+∸-+-assoc (suc m) (suc n) p =
+  begin
+    (suc m) ∸ (suc n) ∸ p
+  ≡⟨⟩
+    m ∸ n ∸ p
+  ≡⟨ ∸-+-assoc m n p ⟩
+    m ∸ (n + p)
+  ≡⟨⟩
+    (suc m) ∸ ((suc n) + p)
+  ∎
