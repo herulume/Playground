@@ -10,6 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 alias Rumbl.Accounts.User
+alias Rumbl.Multimedia
 alias Rumbl.Repo
 
 Repo.insert!(
@@ -18,4 +19,9 @@ Repo.insert!(
         name: "herulume",
         username: "herulume",
         password: "qwerty123"
-}))
+}), on_conflict: :nothing)
+
+
+for category <- ~w(Action Drama Romance Comedy Sci-fi) do
+    Multimedia.create_category!(category)
+end
